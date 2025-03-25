@@ -21,17 +21,29 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "coffeeShop",
+          "id": "coffeeActivity",
           "title": "Coffee Shop",
           "icon": "media/coffee.svg"
         }
       ]
     },
     "views": {
-      "coffeeShop": [
+      "coffeeActivity": [
         {
-          "id": "coffeeOrdersView",
-          "name": "Orders"
+          "id": "productView",
+          "name": "Products"
+        },
+        {
+          "id": "addressView",
+          "name": "Registered Addresses (Select One)"
+        },
+        {
+          "id": "cardView",
+          "name": "Registered Cards (Select One)"
+        },
+        {
+          "id": "orderView",
+          "name": "Order History"
         }
       ]
     }
@@ -62,6 +74,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@terminaldotshop/sdk": "^1.6.0"
+    "@terminaldotshop/sdk": "^1.6.0",
+    "dotenv": "^16.4.7"
   }
 }
