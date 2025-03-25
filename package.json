@@ -16,6 +16,14 @@
       {
         "command": "terminal-shop.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "addressView.selectAddress",
+        "title": "Select Address"
+      },
+      {
+        "command": "cardView.selectCard",
+        "title": "Select Card"
       }
     ],
     "viewsContainers": {

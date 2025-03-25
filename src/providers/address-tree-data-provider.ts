@@ -16,18 +16,34 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
     return element;
   }
 
-  async getChildren(): Promise<AddressItem[]> {
+  async getChildren() {
     if (this.addressCache === null) {
       this.addressCache = await this.fetchAddress();
     }
+    const selectedId = this.context.globalState.get('selectedAddressId');
 
     return this.addressCache.map(address => {
-      return new AddressItem(
+      const isSelected = address.id === selectedId;
+      const item = new AddressItem(
         `${address.street1}, ${address.city}`,
-        `${address.province}, ${address.country}`,
+        `${address.province}, ${address.country}`
       );
-    });
 
+      // Attach a select command
+      item.command = {
+        command: 'addressView.selectAddress',
+        title: 'Select Address',
+        arguments: [address.id]
+      };
+
+      if (isSelected) {
+        item.iconPath = new vscode.ThemeIcon('pass-filled');
+      } else {
+        item.iconPath = new vscode.ThemeIcon('circle-large-outline');
+      }
+
+      return item;
+    });
   }
 
   async fetchAddress() {

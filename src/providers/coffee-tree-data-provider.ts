@@ -23,8 +23,8 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
 
     if (!element) {
       return [
-        new ProductItem('🌟 Featured', vscode.TreeItemCollapsibleState.Expanded, 'group'),
-        new ProductItem('☕ Originals', vscode.TreeItemCollapsibleState.Expanded, 'group')
+        new ProductItem('🌟 Featured 🌟', vscode.TreeItemCollapsibleState.Expanded, 'group'),
+        new ProductItem('☕ Originals ☕', vscode.TreeItemCollapsibleState.Expanded, 'group')
       ];
     }
 

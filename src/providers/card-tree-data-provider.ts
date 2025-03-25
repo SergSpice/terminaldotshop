@@ -16,19 +16,33 @@ export class CardTreeDataProvider implements vscode.TreeDataProvider<CardItem> {
 
   async getChildren(): Promise<CardItem[]> {
     if (this.cardCache === null) {
-      this.cardCache = await this.fetchAddress();
+      this.cardCache = await this.fetchCards();
     }
+    const selectedId = this.context.globalState.get('selectedCardId');
 
     return this.cardCache.map(card => {
-      return new CardItem(
+      const isSelected = card.id === selectedId;
+      const item = new CardItem(
         `${card.brand.toUpperCase()} ending in ${card.last4}`,
         `${card.expiration.month}/${card.expiration.year}`
       );
-    });
 
+      item.command = {
+        command: 'cardView.selectCard',
+        title: 'Select Card',
+        arguments: [card.id]
+      };
+
+      if (isSelected) {
+        item.iconPath = new vscode.ThemeIcon('pass-filled');
+      } else {
+        item.iconPath = new vscode.ThemeIcon('circle-large-outline');
+      }
+      return item;
+    });
   }
 
-  async fetchAddress() {
+  async fetchCards() {
     console.log('Fetching cards');
     const response = await client.card.list();
     return response.data;

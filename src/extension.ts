@@ -26,10 +26,23 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const addressProvider = new AddressTreeDataProvider(context);
   vscode.window.createTreeView('addressView', { treeDataProvider: addressProvider });
+  context.subscriptions.push(
+    vscode.commands.registerCommand('addressView.selectAddress', async (addressId: string) => {
+      console.log('Selected address:', addressId);
+      await context.globalState.update('selectedAddressId', addressId);
+      addressProvider.refresh();
+    })
+  );
 
   const cardProvider = new CardTreeDataProvider(context);
   vscode.window.createTreeView('cardView', { treeDataProvider: cardProvider });
-
+  context.subscriptions.push(
+    vscode.commands.registerCommand('cardView.selectCard', async (cardId: string) => {
+      console.log('Selected card:', cardId);
+      await context.globalState.update('selectedCardId', cardId);
+      cardProvider.refresh();
+    })
+  );
   console.log('Congratulations, your extension "terminal-shop" is now active!');
 
   // The command has been defined in the package.json file
