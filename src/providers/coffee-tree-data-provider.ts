@@ -64,6 +64,7 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
   async fetchProducts() {
     console.log('Fetching products');
     const response = await client.product.list();
+    this.context.globalState.update('products', response.data);
     return response.data;
   }
 

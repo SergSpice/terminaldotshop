@@ -24,8 +24,21 @@
       {
         "command": "cardView.selectCard",
         "title": "Select Card"
+      },
+      {
+        "command": "orderHistory.trackPackage",
+        "title": "Track"
       }
     ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "orderHistory.trackPackage",
+          "when": "view == orderView && viewItem == order",
+          "group": "inline"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -43,15 +56,15 @@
         },
         {
           "id": "addressView",
-          "name": "Registered Addresses (Select One)"
+          "name": "Registered Addresses (Required)"
         },
         {
           "id": "cardView",
-          "name": "Registered Cards (Select One)"
+          "name": "Registered Cards (Required)"
         },
         {
           "id": "orderView",
-          "name": "Order History"
+          "name": "Order History (Zero indexed btw)"
         }
       ]
     }
