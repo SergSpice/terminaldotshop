@@ -1,20 +1,32 @@
 import * as vscode from 'vscode';
 import { CoffeeTreeDataProvider } from './providers/coffee-tree-data-provider';
 import Terminal from '@terminaldotshop/sdk';
-import * as dotenv from 'dotenv';
 import { AddressTreeDataProvider } from './providers/address-tree-data-provider';
 import { CardTreeDataProvider } from './providers/card-tree-data-provider';
 import { OrderHistoryProvider } from './providers/order-history-tree-data-provider';
 
-dotenv.config({
-  path: __dirname + '/../.env'
-});
-
-export const client = new Terminal({
-  environment: 'dev',
-});
-
+export let client: Terminal | null = null;
 export async function activate(context: vscode.ExtensionContext) {
+  const globalToken = await context.globalState.get('userApiToken');
+  if (!globalToken) {
+    const token = await vscode.window.showInputBox({
+      prompt: 'Paste your token',
+      ignoreFocusOut: true,
+      password: false
+    });
+
+    if (token) {
+      await context.globalState.update('userApiToken', token);
+      vscode.window.showInformationMessage('Token saved!');
+    } else {
+      vscode.window.showWarningMessage('No token entered.');
+    }
+  }
+  client = new Terminal({
+    environment: 'production',
+    bearerToken: await context.globalState.get('userApiToken'),
+  });
+
   // NOTE: Coffeee Inventory View
   const coffeeProvider = new CoffeeTreeDataProvider(context);
   vscode.window.createTreeView('productView', { treeDataProvider: coffeeProvider });
@@ -130,19 +142,6 @@ export async function activate(context: vscode.ExtensionContext) {
       }
     }),
   );
-
-
-
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('terminal-shop.helloWorld', () => {
-    // The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World from terminal-shop!');
-  });
-
-  context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
