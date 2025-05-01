@@ -72,7 +72,7 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('cardView.addCard', async () => {
       cardProvider.openWebview(context);
     }),
-    vscode.commands.registerCommand('cardView.refresh', async () => {
+    vscode.commands.registerCommand('cardView.refresh', () => {
       cardProvider.refresh();
     }),
     vscode.commands.registerCommand('cardView.delete', (item) => {
@@ -89,6 +89,9 @@ export async function activate(context: vscode.ExtensionContext) {
       if (trackingUrl) {
         vscode.env.openExternal(vscode.Uri.parse(trackingUrl));
       }
+    }),
+    vscode.commands.registerCommand('orderHistory.refresh', () => {
+      orderProvider.refresh();
     })
   );
 
