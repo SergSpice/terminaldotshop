@@ -8,7 +8,9 @@ export function CardView() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full p-4 gap-5">
-      <h1 className="text-lg">Add payment information</h1>
+      <h1 className="text-2xl font-bold text-center py-4">
+        Payment Method
+      </h1>
       <p>To securely add a payment information, scan the QR code or click the link below.</p>
       {!!collect && (
         <>
