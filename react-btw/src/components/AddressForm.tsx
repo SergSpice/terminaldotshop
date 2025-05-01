@@ -1,7 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -9,17 +9,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import vscode from "@/lib/vscode-bridge"
-import { useEffect, useState } from "react"
+} from "@/components/ui/select";
+import vscode from "@/lib/vscode-bridge";
+import { useEffect, useState } from "react";
+import { CircleCheckBig, CircleX, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -44,15 +45,18 @@ export interface AddressCreateParams {
 
 export function Address() {
   const [state, setState] = useState<'success' | 'error' | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const msg = event.data;
       if (msg.type === 'success') {
+        setLoading(false);
         setState('success');
       }
 
       if (msg.type === 'error') {
+        setLoading(false);
         setState('error');
       }
     }
@@ -64,26 +68,62 @@ export function Address() {
   return (
     <>
       {state === 'error' && (
-        <div className="text-red-500 text-center">
-          An error occurred while creating the address.
+        <div className="space-y-4 text-center pt-8">
+          <h2 className="text-xl font-bold text-red-500 gap-2 flex items-center justify-center">
+            <CircleX className="text-red-500" />
+            Error Adding Address
+          </h2>
+          <p>
+            There was an error adding your address. Please check your input and try again.
+          </p>
+          <Button
+            variant={'destructive'}
+            onClick={() => {
+              vscode.postMessage({
+                command: 'close',
+              });
+            }}
+          >
+            Close Tab
+          </Button>
         </div>
       )}
       {state === 'success' && (
-        <div className="text-green-500 text-center">
-          Address created successfully!
+        <div className="space-y-4 text-center pt-8">
+          <h2 className="text-xl font-bold text-green-500 gap-2 flex items-center justify-center">
+            <CircleCheckBig className="text-green-500" />
+            Address Saved Successfully!
+          </h2>
+          <p>
+            Your address has been added successfully. You can now use it for your orders.
+          </p>
+          <Button
+            variant={'destructive'}
+            onClick={() => {
+              vscode.postMessage({
+                command: 'close',
+              });
+            }}
+          >
+            Close Tab
+          </Button>
         </div>
       )}
-      {!state && <AddressForm onSubmit={(values) => {
-        vscode.postMessage({
-          command: 'submitAddress',
-          payload: values,
-        });
-      }} />}
+      {!state && <AddressForm
+        loading={loading}
+        onSubmit={
+          (values) => {
+            setLoading(true);
+            vscode.postMessage({ command: 'submitAddress', payload: values })
+          }
+        }
+      />}
     </>
   );
 }
 
 interface AddressFormProps {
+  loading: boolean;
   onSubmit: (values: z.infer<typeof formSchema>) => void;
 }
 
@@ -158,7 +198,7 @@ export function AddressForm(props: AddressFormProps) {
             name="province"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Province</FormLabel>
+                <FormLabel>Province / State</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter your province" {...field} />
                 </FormControl>
@@ -200,7 +240,13 @@ export function AddressForm(props: AddressFormProps) {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
+          <Button
+            disabled={props.loading}
+            type="submit"
+          >
+            {props.loading && <Loader2 className="animate-spin" />}
+            Save
+          </Button>
         </form>
       </Form>
     </>

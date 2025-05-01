@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import vscode from "@/lib/vscode-bridge";
-import { Loader2 } from "lucide-react";
+import { CircleCheckBig, Loader2 } from "lucide-react";
 
 interface Product {
   id: string,
@@ -62,17 +62,9 @@ export function Checkout() {
   return (
     <div>
       {placed && (
-        <div className="space-y-4 text-center">
-          <div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 mx-auto text-green-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            />
-          </div>
-          <h2 className="text-xl font-bold text-green-500">
+        <div className="space-y-4 text-center pt-8">
+          <h2 className="text-xl font-bold text-green-500 gap-2 flex items-center justify-center">
+            <CircleCheckBig className="text-green-500" />
             Order Placed Successfully!
           </h2>
           <p className="">
@@ -95,7 +87,7 @@ export function Checkout() {
           <h1 className="text-2xl font-bold text-center py-4">
             Checkout
           </h1>
-          <h2 className="text-xl font-bold">List of Items</h2>
+          <h2 className="text-xl font-bold">Items in your cart</h2>
           <div className="py-8 space-y-4">
             {products.length === 0 && (
               <div className="text-center text-gray-500">
@@ -105,14 +97,14 @@ export function Checkout() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="border border-white dark:border-gray-200 py-4 rounded-lg shadow-lg flex justify-between items-center p-4"
+                className="border border-white dark:border-gray-200 py-4 rounded-lg shadow-lg flex items-center p-4 gap-4"
               >
+                <div className="text-lg font-bold text-center w-14 p-4">
+                  {product.quantity}
+                </div>
                 <div>
                   <h2 className="font-bold text-lg underline">{product.title}</h2>
                   <p>{product.description}</p>
-                </div>
-                <div className="text-lg font-bold text-center w-14 p-4">
-                  {product.quantity}
                 </div>
               </div>
             ))}

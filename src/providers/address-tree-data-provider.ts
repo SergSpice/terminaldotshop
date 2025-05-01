@@ -80,17 +80,24 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
         'Shipping Address',
         () => { },
         async (message: any, panel) => {
-          const [success, _] = await this.createAddress(message.payload);
-          if (!!success) {
-            panel.webview.postMessage({
-              type: 'success',
-              message: `Address added successfully!`
-            });
-          } else {
-            panel.webview.postMessage({
-              type: 'error',
-              message: 'Failed to add address.'
-            });
+          switch (message.command) {
+            case 'submitAddress':
+              const [success, _] = await this.createAddress(message.payload);
+              if (!!success) {
+                panel.webview.postMessage({
+                  type: 'success',
+                  message: `Address added successfully!`
+                });
+              } else {
+                panel.webview.postMessage({
+                  type: 'error',
+                  message: 'Failed to add address.'
+                });
+              }
+              break;
+            case 'close':
+              this.panel?.dispose();
+              this.panel = undefined;
           }
         }
       );
