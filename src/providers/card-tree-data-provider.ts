@@ -46,17 +46,17 @@ export class CardTreeDataProvider implements vscode.TreeDataProvider<CardItem> {
   }
 
   async fetchCards() {
-    const response = await client.card.list();
+    const response = await client!.card.list();
     return response.data;
   }
 
   async collectCard() {
-    const response = await client.card.collect();
+    const response = await client!.card.collect();
     return response.data;
   }
 
   async deleteCard(cardId: string) {
-    await client.card.delete(cardId);
+    await client!.card.delete(cardId);
     this.refresh();
   }
 

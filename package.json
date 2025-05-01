@@ -1,7 +1,8 @@
 {
-  "name": "terminal-shop",
+  "name": "TerminalShop",
   "displayName": "terminal-shop",
   "description": "A coffee shop inspired by Terminal.shop",
+  "publisher": "TerminalShop",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.98.0"
@@ -189,5 +190,6 @@
   "dependencies": {
     "@terminaldotshop/sdk": "^1.11.0",
     "dotenv": "^16.4.7"
-  }
+  },
+  "repository": "https://github.com/SergSpice/terminaldotshop"
 }
