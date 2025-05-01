@@ -4,7 +4,7 @@
   "description": "A coffee shop inspired by Terminal.shop",
   "publisher": "TerminalShop",
   "icon": "media/ext-logo.png",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -15,10 +15,6 @@
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "terminal-shop.helloWorld",
-        "title": "Hello World"
-      },
       {
         "command": "addressView.selectAddress",
         "title": "Select Address"

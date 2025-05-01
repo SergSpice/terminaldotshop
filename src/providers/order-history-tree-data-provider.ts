@@ -42,6 +42,9 @@ export class OrderHistoryProvider implements vscode.TreeDataProvider<vscode.Tree
         const treeItem = new vscode.TreeItem(label, vscode.TreeItemCollapsibleState.Collapsed);
         treeItem.tooltip = `Order ${this.ordersCache!.length - index - 1} | Total: $${orderTotal}`;
         treeItem.contextValue = 'order';
+        if (!!order.tracking.status) {
+          treeItem.description = `- ${order.tracking.status}`; 
+        }
         treeItem.id = order.id;
         (treeItem as any).order = order; // Attach raw order data
         return treeItem;

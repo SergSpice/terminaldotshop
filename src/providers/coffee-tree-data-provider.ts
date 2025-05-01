@@ -115,7 +115,7 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
           vscode.TreeItemCollapsibleState.None,
           'product',
           productIcon,
-          formatPrice(product.variants[0].price),
+          `- ${formatPrice(product.variants[0].price)} | ${product.variants[0].name}`,
           product.description,
           {
             command: 'productView.addToCart',
