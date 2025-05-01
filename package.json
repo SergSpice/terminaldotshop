@@ -28,6 +28,46 @@
       {
         "command": "orderHistory.trackPackage",
         "title": "Track"
+      },
+      {
+        "command": "addressView.addAddress",
+        "title": "Add new address",
+        "icon": "$(add)"
+      },
+      {
+        "command": "addressView.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "addressView.delete",
+        "title": "Delete",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "cardView.addCard",
+        "title": "Add new Card",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cardView.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cardView.delete",
+        "title": "Delete",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "productView.removeFromCart",
+        "title": "Remove from Cart",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "productView.addToCart",
+        "title": "Add to Cart",
+        "icon": "$(add)"
       }
     ],
     "menus": {
@@ -36,6 +76,48 @@
           "command": "orderHistory.trackPackage",
           "when": "view == orderView && viewItem == order",
           "group": "inline"
+        },
+        {
+          "command": "addressView.delete",
+          "when": "view == addressView && viewItem == address",
+          "group": "inline"
+        },
+        {
+          "command": "cardView.delete",
+          "when": "view == cardView && viewItem == card",
+          "group": "inline"
+        },
+        {
+          "command": "productView.removeFromCart",
+          "when": "view == productView && viewItem == product",
+          "group": "inline"
+        },
+        {
+          "command": "productView.addToCart",
+          "when": "view == productView && viewItem == product",
+          "group": "inline"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "addressView.addAddress",
+          "when": "view == addressView",
+          "group": "navigation"
+        },
+        {
+          "command": "addressView.refresh",
+          "when": "view == addressView",
+          "group": "navigation"
+        },
+        {
+          "command": "cardView.addCard",
+          "when": "view == cardView",
+          "group": "navigation"
+        },
+        {
+          "command": "cardView.refresh",
+          "when": "view == cardView",
+          "group": "navigation"
         }
       ]
     },
@@ -56,18 +138,28 @@
         },
         {
           "id": "addressView",
-          "name": "Registered Addresses (Required)"
+          "name": "📍 Registered Addresses (Required)"
         },
         {
           "id": "cardView",
-          "name": "Registered Cards (Required)"
+          "name": "💳 Registered Cards (Required)"
         },
         {
           "id": "orderView",
-          "name": "Order History (Zero indexed btw)"
+          "name": "📬 Order History (Zero indexed btw)"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "addressView",
+        "contents": "In order to use order coffee you need to register a shipping address.\n[Add new address](command:addressView.addAddress)"
+      },
+      {
+        "view": "cardView",
+        "contents": "In order to use order coffee you need to register a credit/debit card\n[Add new card](command:cardView.addCard)"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -95,7 +187,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@terminaldotshop/sdk": "^1.6.0",
+    "@terminaldotshop/sdk": "^1.11.0",
     "dotenv": "^16.4.7"
   }
 }

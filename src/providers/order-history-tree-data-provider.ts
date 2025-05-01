@@ -22,6 +22,7 @@ export class OrderHistoryProvider implements vscode.TreeDataProvider<vscode.Tree
   constructor(private context: vscode.ExtensionContext) { }
 
   refresh() {
+    this.ordersCache = null;
     this._onDidChangeTreeData.fire();
   }
 
@@ -32,7 +33,6 @@ export class OrderHistoryProvider implements vscode.TreeDataProvider<vscode.Tree
   async getChildren(element?: vscode.TreeItem): Promise<vscode.TreeItem[]> {
     if (!this.ordersCache) {
       this.ordersCache = await this.fetchOrderHistory();
-      console.log(this.ordersCache);
     }
 
     if (!element) {
@@ -71,7 +71,6 @@ export class OrderHistoryProvider implements vscode.TreeDataProvider<vscode.Tree
   }
 
   async fetchOrderHistory(): Promise<Terminal.Order[]> {
-    console.log('Fetching order history');
     const response = await client.order.list();
     return response.data;
   }

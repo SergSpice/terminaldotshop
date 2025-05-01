@@ -1,5 +1,3 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { CoffeeTreeDataProvider } from './providers/coffee-tree-data-provider';
 import Terminal from '@terminaldotshop/sdk';
@@ -13,15 +11,10 @@ dotenv.config({
 });
 
 export const client = new Terminal({
-  environment: 'production',
+  environment: 'dev',
 });
 
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
   // NOTE: Coffeee Inventory View
   const coffeeProvider = new CoffeeTreeDataProvider(context);
   vscode.window.createTreeView('productView', { treeDataProvider: coffeeProvider });
@@ -32,8 +25,23 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('addressView.selectAddress', async (addressId: string) => {
       await context.globalState.update('selectedAddressId', addressId);
+      const selected = addressProvider.getAddress();
+      if (selected) {
+        coffeeProvider.setSelectedAddress(selected.id, selected.title);
+        coffeeProvider.refreshWebview();
+      }
       addressProvider.refresh();
-    })
+    }),
+    vscode.commands.registerCommand('addressView.refresh', () => {
+      addressProvider.refresh();
+      vscode.window.showInformationMessage('refresh clicked');
+    }),
+    vscode.commands.registerCommand('addressView.addAddress', () => {
+      addressProvider.openWebview(context);
+    }),
+    vscode.commands.registerCommand('addressView.delete', (item) => {
+      addressProvider.deleteAddress(item.command.arguments[0]);
+    }),
   );
 
   // NOTE: Card View
@@ -42,19 +50,88 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('cardView.selectCard', async (cardId: string) => {
       await context.globalState.update('selectedCardId', cardId);
+      const selected = cardProvider.getSelectedCard();
+      if (selected) {
+        coffeeProvider.setSelectedCard(selected.id, selected.number, selected.expiration);
+        coffeeProvider.refreshWebview();
+      }
       cardProvider.refresh();
-    })
+    }),
+    vscode.commands.registerCommand('cardView.addCard', async () => {
+      cardProvider.openWebview(context);
+    }),
+    vscode.commands.registerCommand('cardView.refresh', async () => {
+      cardProvider.refresh();
+    }),
+    vscode.commands.registerCommand('cardView.delete', (item) => {
+      cardProvider.deleteCard(item.command.arguments[0]);
+    }),
   );
 
   // NOTE: Order View
   const orderProvider = new OrderHistoryProvider(context);
   vscode.window.createTreeView('orderView', { treeDataProvider: orderProvider });
-  vscode.commands.registerCommand('orderHistory.trackPackage', (orderItem) => {
-    const trackingUrl = orderItem?.order.tracking.url;
-    if (trackingUrl) {
-      vscode.env.openExternal(vscode.Uri.parse(trackingUrl));
-    }
-  });
+  context.subscriptions.push(
+    vscode.commands.registerCommand('orderHistory.trackPackage', (orderItem) => {
+      const trackingUrl = orderItem?.order.tracking.url;
+      if (trackingUrl) {
+        vscode.env.openExternal(vscode.Uri.parse(trackingUrl));
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('productView.removeFromCart', (product: any) => {
+      if (!coffeeProvider.isPanelOpen()) {
+        const address = addressProvider.getAddress();
+        const card = cardProvider.getSelectedCard();
+        if (address) {
+          coffeeProvider.setSelectedAddress(address.id, address.title);
+        }
+        if (card) {
+          coffeeProvider.setSelectedCard(
+            card.id,
+            card.number,
+            card.expiration,
+          );
+        }
+        coffeeProvider.openWebview(context, () => {
+          orderProvider.refresh()
+        });
+      } else {
+        coffeeProvider.removeProductFromCart(product.id);
+        coffeeProvider.refreshWebview();
+      }
+    }),
+    vscode.commands.registerCommand('productView.addToCart', (product: any) => {
+      if (typeof product === 'string') {
+        return;
+      }
+      if (!coffeeProvider.isPanelOpen()) {
+        const address = addressProvider.getAddress();
+        const card = cardProvider.getSelectedCard();
+        if (address) {
+          coffeeProvider.setSelectedAddress(address.id, address.title);
+        }
+        if (card) {
+          coffeeProvider.setSelectedCard(
+            card.id,
+            card.number,
+            card.expiration,
+          );
+        }
+        coffeeProvider.openWebview(context, () => {
+          orderProvider.refresh();
+        });
+      } else {
+        coffeeProvider.addProductToCart(product.id, product.label, product.tooltip);
+        coffeeProvider.refreshWebview();
+        coffeeProvider.reveal();
+      }
+    }),
+  );
+
+
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand

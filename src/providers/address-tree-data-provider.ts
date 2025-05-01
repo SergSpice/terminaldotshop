@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
 import { client } from '../extension';
-import Terminal from '@terminaldotshop/sdk';
 import { AddressItem } from '../models/address-item';
+import { openReactWebview } from '../open-webview';
+import Terminal from '@terminaldotshop/sdk';
 
 export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<AddressItem | undefined | null | void> = new vscode.EventEmitter<AddressItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<AddressItem | undefined | null | void> = this._onDidChangeTreeData.event;
   private addressCache: Terminal.Address[] | null = null;
+  private panel: vscode.WebviewPanel | undefined;
 
   constructor(
     private context: vscode.ExtensionContext
@@ -22,14 +24,14 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
     }
     const selectedId = this.context.globalState.get('selectedAddressId');
 
-    return this.addressCache.map(address => {
+    return this.addressCache!.map(address => {
       const isSelected = address.id === selectedId;
       const item = new AddressItem(
         `${address.street1}, ${address.city}`,
         `${address.province}, ${address.country}`
       );
+      item.contextValue = 'address';
 
-      // Attach a select command
       item.command = {
         command: 'addressView.selectAddress',
         title: 'Select Address',
@@ -46,13 +48,80 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
     });
   }
 
+  getCache() {
+    return this.addressCache;
+  }
+
   async fetchAddress() {
-    console.log('Fetching address');
     const response = await client.address.list();
     return response.data;
   }
 
+  async createAddress(values: any) {
+    try {
+      const response = await client.address.create(values);
+      this.refresh();
+      return [response, null]
+    } catch (err) {
+      return [null, err];
+    }
+  }
+
+  async deleteAddress(addressId: string): Promise<void> {
+    await client.address.delete(addressId);
+    this.refresh();
+  }
+
+  openWebview(context: vscode.ExtensionContext) {
+    if (!this.panel) {
+      this.panel = openReactWebview(
+        'add-address',
+        context,
+        'Shipping Address',
+        () => { },
+        async (message: any, panel) => {
+          const [success, _] = await this.createAddress(message.payload);
+          if (!!success) {
+            panel.webview.postMessage({
+              type: 'success',
+              message: `Address added successfully!`
+            });
+          } else {
+            panel.webview.postMessage({
+              type: 'error',
+              message: 'Failed to add address.'
+            });
+          }
+        }
+      );
+      this.panel.onDidDispose(() => {
+        this.panel = undefined;
+      });
+    } else {
+      this.panel.reveal(vscode.ViewColumn.One);
+    }
+  }
+
   refresh(): void {
+    this.addressCache = null;
     this._onDidChangeTreeData.fire();
+  }
+
+  getAddress() {
+    if (this.addressCache) {
+      const address = this.addressCache.find((address) => {
+        return address.id === this.context.globalState.get('selectedAddressId');
+      });
+
+      if (!address) {
+        return null;
+      }
+
+      return {
+        id: this.context.globalState.get('selectedAddressId') as string,
+        title: `${address.street1}, ${address.city}, ${address.province}, ${address.country}`
+
+      }
+    }
   }
 }
