@@ -71,6 +71,11 @@
         "command": "productView.addToCart",
         "title": "Add to Cart",
         "icon": "$(add)"
+      },
+      {
+        "command": "registerToken",
+        "title": "Register Token",
+        "icon": "$(key)"
       }
     ],
     "menus": {
@@ -126,6 +131,11 @@
           "command": "orderHistory.refresh",
           "when": "view == orderView",
           "group": "navigation"
+        },
+        {
+          "command": "registerToken",
+          "when": "view == productView",
+          "group": "navigation@1"
         }
       ]
     },

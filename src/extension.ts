@@ -6,22 +6,8 @@ import { CardTreeDataProvider } from './providers/card-tree-data-provider';
 import { OrderHistoryProvider } from './providers/order-history-tree-data-provider';
 
 export let client: Terminal | null = null;
-export async function activate(context: vscode.ExtensionContext) {
-  const globalToken = await context.globalState.get('userApiToken');
-  if (!globalToken) {
-    const token = await vscode.window.showInputBox({
-      prompt: 'Paste your token',
-      ignoreFocusOut: true,
-      password: false
-    });
 
-    if (token) {
-      await context.globalState.update('userApiToken', token);
-      vscode.window.showInformationMessage('Token saved!');
-    } else {
-      vscode.window.showWarningMessage('No token entered.');
-    }
-  }
+export async function initializeExtension(context: vscode.ExtensionContext) {
   client = new Terminal({
     environment: 'production',
     bearerToken: await context.globalState.get('userApiToken'),
@@ -46,7 +32,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }),
     vscode.commands.registerCommand('addressView.refresh', () => {
       addressProvider.refresh();
-      vscode.window.showInformationMessage('refresh clicked');
     }),
     vscode.commands.registerCommand('addressView.addAddress', () => {
       addressProvider.openWebview(context);
@@ -147,5 +132,32 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 }
 
-// This method is called when your extension is deactivated
+export async function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand('registerToken', async () => {
+      const token = await vscode.window.showInputBox({
+        prompt: 'Paste your token',
+        ignoreFocusOut: true,
+        password: false
+      });
+
+      if (token) {
+        await context.globalState.update('userApiToken', token);
+        vscode.window.showInformationMessage('Token saved!');
+        await initializeExtension(context);
+      } else {
+        vscode.window.showWarningMessage('No token entered.');
+      }
+    }),
+  );
+
+  const globalToken = await context.globalState.get('userApiToken');
+  if (!globalToken) {
+    await vscode.commands.executeCommand('registerToken');
+    return;
+  }
+
+  await initializeExtension(context);
+}
+
 export function deactivate() { }
