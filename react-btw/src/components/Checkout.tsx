@@ -30,6 +30,12 @@ export function Checkout() {
   const [placed, setPlaced] = useState(false);
 
   useEffect(() => {
+    vscode.postMessage({
+      command: 'onMount',
+    });
+  }, []);
+
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const msg = event.data;
       if (msg.command === 'updateCart') {

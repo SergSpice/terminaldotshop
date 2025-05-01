@@ -156,6 +156,9 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
         () => { },
         async (message: any, panel) => {
           switch (message.command) {
+            case 'onMount':
+              this.refreshWebview();
+              break;
             case 'calculateTotal':
               await client!.cart.clear();
               const promises = [];
@@ -208,6 +211,11 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
         if (e.webviewPanel.visible) {
           this.refreshWebview();
         }
+      });
+
+      this.panel.onDidDispose(() => {
+        this.resetCart();
+        this.panel = undefined
       });
     } else {
       this.panel.reveal(vscode.ViewColumn.One);

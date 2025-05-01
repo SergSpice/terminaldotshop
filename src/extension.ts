@@ -122,6 +122,7 @@ export async function activate(context: vscode.ExtensionContext) {
       if (typeof product === 'string') {
         return;
       }
+      coffeeProvider.addProductToCart(product.id, product.label, product.tooltip);
       if (!coffeeProvider.isPanelOpen()) {
         const address = addressProvider.getAddress();
         const card = cardProvider.getSelectedCard();
@@ -139,7 +140,6 @@ export async function activate(context: vscode.ExtensionContext) {
           orderProvider.refresh();
         });
       } else {
-        coffeeProvider.addProductToCart(product.id, product.label, product.tooltip);
         coffeeProvider.refreshWebview();
         coffeeProvider.reveal();
       }
