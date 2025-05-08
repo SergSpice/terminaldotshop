@@ -53,13 +53,13 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
   }
 
   async fetchAddress() {
-    const response = await client!.address.list();
+    const response = await client.operate().address.list();
     return response.data;
   }
 
   async createAddress(values: any) {
     try {
-      const response = await client!.address.create(values);
+      const response = await client.operate().address.create(values);
       this.refresh();
       return [response, null]
     } catch (err) {
@@ -68,7 +68,7 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
   }
 
   async deleteAddress(addressId: string): Promise<void> {
-    await client!.address.delete(addressId);
+    await client.operate().address.delete(addressId);
     this.refresh();
   }
 
@@ -129,6 +129,13 @@ export class AddressTreeDataProvider implements vscode.TreeDataProvider<AddressI
         title: `${address.street1}, ${address.city}, ${address.province}, ${address.country}`
 
       }
+    }
+  }
+
+  closePane() {
+    if (this.panel) {
+      this.panel.dispose();
+      this.panel = undefined;
     }
   }
 }

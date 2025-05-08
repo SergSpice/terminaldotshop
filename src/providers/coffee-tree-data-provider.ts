@@ -142,7 +142,7 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
   }
 
   async fetchProducts() {
-    const response = await client!.product.list();
+    const response = await client.operate().product.list();
     this.context.globalState.update('products', response.data);
     return response.data;
   }
@@ -160,24 +160,24 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
               this.refreshWebview();
               break;
             case 'calculateTotal':
-              await client!.cart.clear();
+              await client.operate().cart.clear();
               const promises = [];
               message.payload.products.forEach(async (product: any) => {
-                const request = client!.cart.setItem({
+                const request = client.operate().cart.setItem({
                   productVariantID: product.id,
                   quantity: product.quantity,
                 })
                 promises.push(request);
               });
-              promises.push(client!.cart.setAddress({
+              promises.push(client.operate().cart.setAddress({
                 addressID: message.payload.address
               }));
-              promises.push(client!.cart.setCard({
+              promises.push(client.operate().cart.setCard({
                 cardID: message.payload.card
               }));
               try {
                 await Promise.all(promises);
-                const cart = await client!.cart.get();
+                const cart = await client.operate().cart.get();
                 this.panel!.webview.postMessage({
                   command: 'calculateTotal',
                   payload: formatPrice(cart.data.amount.total!),
@@ -189,7 +189,7 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
               break;
             case 'placeOrder':
               try {
-                await client!.cart.convert();
+                await client.operate().cart.convert();
                 this.panel!.webview.postMessage({ command: 'orderPlaced' });
                 onOrderPlaced();
                 this.resetCart();
@@ -243,5 +243,13 @@ export class CoffeeTreeDataProvider implements vscode.TreeDataProvider<ProductIt
 
   refresh(): void {
     this.productsCache = null;
+    this._onDidChangeTreeData.fire();
+  }
+
+  closePane() {
+    if (this.panel) {
+      this.panel.dispose();
+      this.panel = undefined;
+    }
   }
 }

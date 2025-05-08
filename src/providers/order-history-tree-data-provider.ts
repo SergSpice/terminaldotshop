@@ -74,7 +74,7 @@ export class OrderHistoryProvider implements vscode.TreeDataProvider<vscode.Tree
   }
 
   async fetchOrderHistory(): Promise<Terminal.Order[]> {
-    const response = await client!.order.list();
+    const response = await client.operate().order.list();
     return response.data;
   }
 }

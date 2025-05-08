@@ -46,17 +46,17 @@ export class CardTreeDataProvider implements vscode.TreeDataProvider<CardItem> {
   }
 
   async fetchCards() {
-    const response = await client!.card.list();
+    const response = await client.operate().card.list();
     return response.data;
   }
 
   async collectCard() {
-    const response = await client!.card.collect();
+    const response = await client.operate().card.collect();
     return response.data;
   }
 
   async deleteCard(cardId: string) {
-    await client!.card.delete(cardId);
+    await client.operate().card.delete(cardId);
     this.refresh();
   }
 
@@ -97,5 +97,12 @@ export class CardTreeDataProvider implements vscode.TreeDataProvider<CardItem> {
   refresh(): void {
     this.cardCache = null;
     this._onDidChangeTreeData.fire();
+  }
+
+  closePane() {
+    if (this.panel) {
+      this.panel.dispose();
+      this.panel = undefined;
+    }
   }
 }

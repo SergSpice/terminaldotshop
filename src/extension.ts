@@ -1,18 +1,13 @@
 import * as vscode from 'vscode';
 import { CoffeeTreeDataProvider } from './providers/coffee-tree-data-provider';
-import Terminal from '@terminaldotshop/sdk';
 import { AddressTreeDataProvider } from './providers/address-tree-data-provider';
 import { CardTreeDataProvider } from './providers/card-tree-data-provider';
 import { OrderHistoryProvider } from './providers/order-history-tree-data-provider';
+import { ClientBuilder } from './client-builder';
 
-export let client: Terminal | null = null;
+export let client = new ClientBuilder();
 
 export async function initializeExtension(context: vscode.ExtensionContext) {
-  client = new Terminal({
-    environment: 'production',
-    bearerToken: await context.globalState.get('userApiToken'),
-  });
-
   // NOTE: Coffeee Inventory View
   const coffeeProvider = new CoffeeTreeDataProvider(context);
   vscode.window.createTreeView('productView', { treeDataProvider: coffeeProvider });
@@ -34,7 +29,9 @@ export async function initializeExtension(context: vscode.ExtensionContext) {
       addressProvider.refresh();
     }),
     vscode.commands.registerCommand('addressView.addAddress', () => {
-      addressProvider.openWebview(context);
+      if (client.isInitialized()) {
+        addressProvider.openWebview(context);
+      }
     }),
     vscode.commands.registerCommand('addressView.delete', (item) => {
       addressProvider.deleteAddress(item.command.arguments[0]);
@@ -55,7 +52,9 @@ export async function initializeExtension(context: vscode.ExtensionContext) {
       cardProvider.refresh();
     }),
     vscode.commands.registerCommand('cardView.addCard', async () => {
-      cardProvider.openWebview(context);
+      if (client.isInitialized()) {
+        cardProvider.openWebview(context);
+      }
     }),
     vscode.commands.registerCommand('cardView.refresh', () => {
       cardProvider.refresh();
@@ -95,9 +94,11 @@ export async function initializeExtension(context: vscode.ExtensionContext) {
             card.expiration,
           );
         }
-        coffeeProvider.openWebview(context, () => {
-          orderProvider.refresh()
-        });
+        if (client.isInitialized()) {
+          coffeeProvider.openWebview(context, () => {
+            orderProvider.refresh()
+          });
+        }
       } else {
         coffeeProvider.removeProductFromCart(product.id);
         coffeeProvider.refreshWebview();
@@ -121,18 +122,60 @@ export async function initializeExtension(context: vscode.ExtensionContext) {
             card.expiration,
           );
         }
-        coffeeProvider.openWebview(context, () => {
-          orderProvider.refresh();
-        });
+        if (client.isInitialized()) {
+          coffeeProvider.openWebview(context, () => {
+            orderProvider.refresh();
+          });
+        }
       } else {
         coffeeProvider.refreshWebview();
         coffeeProvider.reveal();
       }
     }),
+    vscode.commands.registerCommand('productView.refresh', () => {
+      coffeeProvider.refresh();
+    }),
+    vscode.commands.registerCommand('closeAllPanels', () => {
+      coffeeProvider.closePane();
+      addressProvider.closePane();
+      cardProvider.closePane();
+    }),
+    vscode.commands.registerCommand('clearToken', async () => {
+      await context.globalState.update('userApiToken', undefined);
+      vscode.commands.executeCommand('workbench.action.reloadWindow');
+    }),
   );
 }
 
+function initializeClient(token: string) {
+  const environment = token.split('_')[1];
+
+  if (!environment) {
+    vscode.window.showErrorMessage('Invalid token');
+  }
+
+  switch (environment) {
+    case 'live':
+      client.setEnvironment('production');
+      client.setToken(token);
+      break;
+    case 'test':
+      client.setEnvironment('dev');
+      client.setToken(token);
+      break;
+    default:
+      vscode.window.showErrorMessage('Invalid token');
+  }
+  vscode.commands.executeCommand('closeAllPanels');
+  client.initialize();
+  vscode.commands.executeCommand('addressView.refresh');
+  vscode.commands.executeCommand('cardView.refresh');
+  vscode.commands.executeCommand('orderHistory.refresh');
+  vscode.commands.executeCommand('productView.refresh');
+}
+
 export async function activate(context: vscode.ExtensionContext) {
+  const savedToken: string | undefined = await context.globalState.get('userApiToken');
   context.subscriptions.push(
     vscode.commands.registerCommand('registerToken', async () => {
       const token = await vscode.window.showInputBox({
@@ -140,21 +183,19 @@ export async function activate(context: vscode.ExtensionContext) {
         ignoreFocusOut: true,
         password: false
       });
-
       if (token) {
+        initializeClient(token.trim());
         await context.globalState.update('userApiToken', token);
-        vscode.window.showInformationMessage('Token saved!');
-        await initializeExtension(context);
       } else {
         vscode.window.showWarningMessage('No token entered.');
       }
     }),
   );
 
-  const globalToken = await context.globalState.get('userApiToken');
-  if (!globalToken) {
+  if (!savedToken) {
     await vscode.commands.executeCommand('registerToken');
-    return;
+  } else {
+    initializeClient(savedToken);
   }
 
   await initializeExtension(context);

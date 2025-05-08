@@ -73,9 +73,24 @@
         "icon": "$(add)"
       },
       {
+        "command": "productView.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
         "command": "registerToken",
         "title": "Register Token",
         "icon": "$(key)"
+      },
+      {
+        "command": "closeAllPanels",
+        "title": "Close All Panels",
+        "icon": "$(close)"
+      },
+      {
+        "command": "clearToken",
+        "title": "Remove token",
+        "icon": "$(clear-all)"
       }
     ],
     "menus": {
@@ -136,6 +151,11 @@
           "command": "registerToken",
           "when": "view == productView",
           "group": "navigation@1"
+        },
+        {
+          "command": "clearToken",
+          "when": "view == productView",
+          "group": "navigation@2"
         }
       ]
     },
